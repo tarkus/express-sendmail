@@ -1,3 +1,3 @@
-h1.Express Sendmail
+# Express Sendmail
 
-Basically a `nodemailer` wrapper, so you can use `res.sendmail` to send mail with template support
+Basically a `nodemailer` wrapper, enable you use `res.sendmail` to send mail with template support
