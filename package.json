@@ -1,0 +1,39 @@
+{
+  "name": "express-sendmail",
+  "version": "0.4.5",
+  "description": "nodemailer wrapper",
+  "main": "./lib",
+  "scripts": {
+    "test": "make test"
+  },
+  "author": "Tarkus Liu <tarkus.nnkh@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "underscore": "~1.6.0",
+    "nodemailer": "~0.6.2",
+    "jade": "~1.3.1"
+  },
+  "devDependencies": {
+    "should": "~3.3.1",
+    "request": "~2.34.0",
+    "express": "~4.0.0",
+    "mocha": "~1.18.2",
+    "coffee-script": "~1.7.1"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/tarkus/express-sendmail.git"
+  },
+  "keywords": [
+    "express",
+    "middleware",
+    "mailer"
+  ],
+  "bugs": {
+    "url": "https://github.com/tarkus/express-sendmail/issues"
+  },
+  "homepage": "https://github.com/tarkus/express-sendmail"
+}
