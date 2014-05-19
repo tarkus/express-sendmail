@@ -4,17 +4,16 @@ jade   = require 'jade'
 mailer = require 'nodemailer'
 _      = require 'underscore'
 
-config = {}
+settings  = {}
 templates = {}
 filenames = {}
 transport = null
 
-send_function = (req, res, next) ->
-  (mail, options, variables, callback) ->
-    defaults = from: config.sender or "<noreply@example.com>"
+exports.send = (mail, options, variables, done) ->
+    defaults = from: options.sender or settings.sender
 
     if typeof variables is 'function'
-      callback = variables
+      done = variables
       variables = {}
 
     options = _.extend options, defaults
@@ -23,26 +22,30 @@ send_function = (req, res, next) ->
     return callback "No Such Mail" unless templates["#{mail}.txt"]?
 
     unless options.subject
-      if res.locals.t
-        options.subject = res.locals.t("mailer.#{mail}.subject")
+      if variables.t
+        options.subject = variables.t("mailer.#{mail}.subject")
 
     return transport.sendMail options, callback if options.text or options.html
 
-    variables.t = res.locals.t
-    variables.filename = filenames["#{mail}.txt"]
+    text_mail = (callback) ->
+      return callback() unless filenames["#{mail}.txt"]
+      variables.filename = filenames["#{mail}.txt"]
+      jade.render templates["#{mail}.txt"], variables, (err, text) ->
+        return callback err if err
+        options.text = text
+        return callback()
 
-    jade.render templates["#{mail}.txt"], variables, (err, text) ->
-      return callback err if err
-      options.text = text
-      return transport.sendMail options, callback unless templates["#{mail}.html"]
-
+    html_mail = (callback) ->
+      return callback() unless filenames["#{mail}.html"]
       variables.filename = filenames["#{mail}.html"]
       jade.render templates["#{mail}.html"], variables, (err, html) ->
         return callback err if err
         options.html = html
-        return transport.sendMail options, callback
+        return callback()
 
-exports.connect = (_config) ->
+    text_mail -> html_mail -> transport.sendMail options, done
+
+exports.configure = (_options) ->
 
   ###
     smtp:
@@ -54,33 +57,18 @@ exports.connect = (_config) ->
     view_path: "views/mailer"
   ###
 
-  config = _.extend config, _config
-  throw new Error "view_path must be set" unless config.view_path
+  options = _.extend settings, _options
+  throw new Error "view_path must be set" unless settings.view_path
 
-  files = fs.readdirSync config.view_path
+  files = fs.readdirSync settings.view_path
 
   if files
     for file in files
-      fullpath = path.join config.view_path, file
+      fullpath = path.join options.view_path, file
       templates[path.basename(file, '.jade')] = fs.readFileSync(fullpath).toString()
       filenames[path.basename(file, '.jade')] = fullpath
 
-  if config.smtp
-    transport = mailer.createTransport 'SMTP', config.smtp
+  if settings.smtp
+    transport = mailer.createTransport 'SMTP', settings.smtp
   else
     transport = mailer.createTransport 'Stub'
-
-  (req, res, next) ->
-    res.sendmail = send_function req, res, next
-    next()
-
-
-
-  
-
-    
-
-
-
-
-

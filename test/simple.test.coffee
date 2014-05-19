@@ -2,22 +2,22 @@ should = require 'should'
 express = require 'express'
 request = require 'request'
 
-sendmail = require '../lib'
+mailer = require '../lib'
+
+mailer.configure
+  sender: "Tarkus <hello@tarkus.im>"
+  view_path: "#{__dirname}"
 
 describe 'Express Sendmail', ->
 
   before (done) ->
     app = express()
 
-    app.use sendmail.connect
-      sender: "Tarkus <hello@tarkus.im>"
-      view_path: "#{__dirname}"
-
     app.get '/', (req, res, next) ->
       variables =
         username: "John"
         content: "How are you?"
-      res.sendmail 'test',
+      mailer.send 'test',
         subject: "Long time no see"
         to: "hello@tarkus.im"
       , variables, (error, response) ->
